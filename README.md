@@ -1,1 +1,1 @@
-# music-control-with-gestures
+Control Spotify music player with simple hand gestures.
