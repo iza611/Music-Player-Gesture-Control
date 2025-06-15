@@ -1,3 +1,4 @@
+### CURRENT PLAN
 A modular, real-time gesture recognition system using webcam input to trigger user-defined actions — such as controlling Spotify — via local HTTP APIs. Built for easy integration and full terminal control. No GUI required.
 
 ---
