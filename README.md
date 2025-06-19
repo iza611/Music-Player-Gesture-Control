@@ -47,12 +47,19 @@ A modular, real-time gesture recognition system using webcam input to trigger us
 ---
 
 ## Machine Learning 
-(TBD)
+
+### Flow
+
+1) Keypoint detection with MediaPipe Hands (pretrained, ready to use)
+2) Preprocessing (normalise, extract features e.g., angles, distances?)
+3) Update temporal input buffer (10-30 last frames)
+4) Classify with 1D CNN / lightweight TCN (needs to be trained)
+5) Post-processing (e.g., majority vote or exponential moving average?)
 
 ---
 
 ## Notes
 
 - Gesture classification from short video clips
-  Trained models and embeddings saved locally
+  Trained models and embeddings/keypoints saved locally
 - testing?
