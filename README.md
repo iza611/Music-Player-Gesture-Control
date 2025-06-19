@@ -63,3 +63,22 @@ A modular, real-time gesture recognition system using webcam input to trigger us
 - Gesture classification from short video clips
   Trained models and embeddings/keypoints saved locally
 - testing?
+
+## Plan
+1. run webcam in simplest gui with mediapipe hand keypoint detector
+2. record keypoints with a script
+3. prep dataset for a classifier, see what data it needs; decide what gestures to include, what they will correspond to
+4. code classifier training and evaluation
+5. train and evaluate (maybe with google colab)
+6. create a setup for retraining and automatic update of the model to the container
+7. write a script to turn on the webcam & send frames with http (local)
+
+container 1
+follow tutorial to setup fastapi docker ml service 
+- receive frames
+- use both models
+- send results (detected gesture)
+
+container 2
+try to set up without help
+receive gesture > transform to command > send request to spotify
