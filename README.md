@@ -1,22 +1,17 @@
-### CURRENT PLAN
-A modular, real-time gesture recognition system using webcam input to trigger user-defined actions — such as controlling Spotify — via local HTTP APIs. Built for easy integration and full terminal control. No GUI required.
+### Overview
+A modular, real-time gesture recognition system using webcam input to trigger user-defined actions — here controlling Spotify — via local HTTP APIs. Built for easy integration and full terminal control. 
 
 ---
 
-### Flow
+Local Script: Captures webcam frames → posts to HTTP endpoint.
 
-1) Webcam captures video in real time.
-2) Gesture recognition detects when a user performs a predefined gesture.
-3) When a gesture is recognized, a mapped HTTP endpoint (e.g. `/gesture/play`) is triggered.
-4) That endpoint invokes an action — like controlling Spotify — via API.
+Container A (Gesture Recognition): Receives frames → performs inference → posts predicted gesture.
 
----
-
-## Components
+Container B (Spotify Control): Receives gesture → maps to a Spotify command → sends API call.
 
 ### 🔹 Host Script 
 - Initializes the webcam and launches both containers.
-- Manages webcam access for environments where Docker may have limited hardware access (e.g., Windows).
+- View, list, and manage gesture-command setup by contacting Container 2.
 
 ---
 
@@ -25,31 +20,9 @@ A modular, real-time gesture recognition system using webcam input to trigger us
 - Runs real-time gesture recognition.
 - Provides a local **HTTP API** at `localhost:8000` (e.g., using FastAPI or Flask).
 - Exposes gesture-triggered endpoints like `/gesture/play`, `/gesture/next`, etc.
-
-#### Features:
-- Includes some predefined gestures with mapped API endpoints.
-- Allows recording and adding custom gestures via terminal interface.
-- View, list, and manage gestures from command-line.
-- Saves trained models and gesture embeddings to a **mounted volume** for persistence.
 - Clean integration with any program via HTTP — "plug-and-play."
 
----
-
-### 🔹 Container 2: Spotify Controller
-
-- Uses Spotify's **official Web API**.
-- Listens for requests from Container 1 or other local tools.
-- Runs a lightweight server at `localhost:8001`, or as a callable Python script.
-
-#### Example:
-- Container 1 sends `POST /play` → triggers Spotify’s `play()` API via Container 2.
-
----
-
-## Machine Learning 
-
-### Flow
-
+ML:
 1) Keypoint detection with MediaPipe Hands (pretrained, ready to use)
 2) Preprocessing (normalise, extract features e.g., angles, distances?)
 3) Update temporal input buffer (10-30 last frames)
@@ -58,13 +31,27 @@ A modular, real-time gesture recognition system using webcam input to trigger us
 
 ---
 
-## Notes
+### 🔹 Container 2: Spotify Controller
 
-- Gesture classification from short video clips
-  Trained models and embeddings/keypoints saved locally
-- testing?
+- Uses Spotify's **official Web API**.
+- Listens for requests from Container 1 or other local tools.
+- Manages the gesture-command setup and provides an interface for the local host to interact with the setup.
 
-## Plan
+---
+
+## Training and dataset prep
+
+- Separately in dir 'model_training'
+- Training on the local machine or with Google Colab (tbd)
+
+---
+
+#### Example:
+- Container 1 sends `POST /thumbs_up` → triggers Spotify’s `add_to_favourites()` API via Container 2.
+
+
+
+## Step-by-Step Plan
 1. run webcam in simplest gui with mediapipe hand keypoint detector
 2. record keypoints with a script
 3. prep dataset for a classifier, see what data it needs; decide what gestures to include, what they will correspond to
@@ -82,3 +69,6 @@ follow tutorial to setup fastapi docker ml service
 container 2
 try to set up without help
 receive gesture > transform to command > send request to spotify
+
+## In future
+add an option to add new gestures
