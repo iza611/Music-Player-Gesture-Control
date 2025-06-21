@@ -1,1 +1,0 @@
-# use gui.py to capture data for training
