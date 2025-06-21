@@ -50,6 +50,7 @@ class RecordGesturesApp(BaseApp):
 
     def start_recording(self):
         self.window.show_message("Recording")
+        self.window.realtime_video.configure(highlightbackground="red")
         self.is_recording = True
 
     def display_frame(self):
@@ -62,6 +63,7 @@ class RecordGesturesApp(BaseApp):
             if len(self.recorded_keypoints) >= num_of_frames: 
                 self.save_sample()
                 self.window.show_message("Recording saved. Start new recording when you're ready.")
+                self.window.realtime_video.configure(highlightbackground="black")
                 #cleanup
                 self.is_recording = False
                 self.recorded_keypoints = []

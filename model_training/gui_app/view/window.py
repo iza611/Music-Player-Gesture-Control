@@ -6,7 +6,10 @@ class BaseWindow():
         # self.root.title("GUI")
         self.root.geometry('1000x700')
 
-        self.realtime_video = tk.Label(self.root, text="couldn't open your camera")
+        self.realtime_video = tk.Label(self.root, 
+                                       text="couldn't open your camera", 
+                                       highlightthickness=6, 
+                                       highlightbackground="black")
         self.realtime_video.grid(column=0, row=0)
 
         self.lbl = tk.Label(self.root, text = "")
@@ -20,14 +23,17 @@ class RecordingMode(BaseWindow):
         super().__init__()
         self.record_callback = record_callback
         self.lbl.configure(text = "Start recording when you're ready")
-        btn = tk.Button(self.root, text = "Record",fg = "red", command=self.record_clicked)
+        btn = tk.Button(self.root, 
+                        text = "Record",
+                        fg = "red", 
+                        command=self.record_clicked)
         btn.grid(column=0, row=2)
 
     def record_clicked(self):
         self.countdown(3)
     
     def countdown(self, count):
-        if count >= 0:
+        if count > 0:
             self.show_message(f"Recording in {count}...")
             self.root.after(1000, lambda: self.countdown(count - 1))
         else:
