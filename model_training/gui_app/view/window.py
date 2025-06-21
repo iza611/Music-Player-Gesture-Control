@@ -18,9 +18,20 @@ class BaseWindow():
 class RecordingMode(BaseWindow):
     def __init__(self, record_callback):
         super().__init__()
-        self.lbl.configure(text = "(rendering option picked)")
-        btn = tk.Button(self.root, text = "Record",fg = "red", command=record_callback)
+        self.record_callback = record_callback
+        self.lbl.configure(text = "Start recording when you're ready")
+        btn = tk.Button(self.root, text = "Record",fg = "red", command=self.record_clicked)
         btn.grid(column=0, row=2)
+
+    def record_clicked(self):
+        self.countdown(3)
+    
+    def countdown(self, count):
+        if count >= 0:
+            self.show_message(f"Recording in {count}...")
+            self.root.after(1000, lambda: self.countdown(count - 1))
+        else:
+            self.record_callback()
 
     def show_message(self, message: str):
         self.lbl.configure(text = message)

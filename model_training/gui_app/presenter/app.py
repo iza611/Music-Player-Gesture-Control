@@ -19,7 +19,7 @@ class BaseApp():
     def display_frame(self):
         # capture, annotate and process frame
         frame = self.cap.get_frame()
-        frame_annotated, keypoints = self.mediapipe_hands.detect_keypoints(frame)
+        frame_annotated, self.keypoints = self.mediapipe_hands.detect_keypoints(frame)
         photo_image = convert_to_photo_image(frame_annotated)
         # display in the window
         self.window.realtime_video.photo_image = photo_image
@@ -43,12 +43,29 @@ class RecordGesturesApp(BaseApp):
     UI includes button to start recording. Once pressed countdown appears to indicate video length.
     """
     def __init__(self):
-        window = RecordingMode(self.record_clicked)
+        window = RecordingMode(self.start_recording)
         super().__init__(window)
+        self.is_recording = False
+        self.recorded_keypoints = []
 
-    def record_clicked(self):
-        # Placeholder; start recording logic here with RecordGesture
-        self.window.show_message("Recording started")
+    def start_recording(self):
+        self.window.show_message("Recording")
+        self.is_recording = True
+
+    def display_frame(self):
+        super().display_frame()
+        if self.is_recording:
+            self.recorded_keypoints.append(self.keypoints)
+            self.window.show_message(f"{50-len(self.recorded_keypoints)}")
+            if len(self.recorded_keypoints) >= 30: # num. of frames = 30
+                self.save_sample()
+                self.window.show_message("Recording saved. Start new recording when you're ready.")
+                #cleanup
+                self.is_recording = False
+                self.recorded_keypoints = []
+
+    def save_sample(self):
+        pass
 
 class PredictGestureLiveApp(BaseApp):
     """
