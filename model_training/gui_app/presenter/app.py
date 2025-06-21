@@ -55,9 +55,11 @@ class RecordGesturesApp(BaseApp):
     def display_frame(self):
         super().display_frame()
         if self.is_recording:
+            num_of_frames = 30
             self.recorded_keypoints.append(self.keypoints)
-            self.window.show_message(f"{50-len(self.recorded_keypoints)}")
-            if len(self.recorded_keypoints) >= 30: # num. of frames = 30
+            self.window.show_message(f"{num_of_frames-len(self.recorded_keypoints)}")
+
+            if len(self.recorded_keypoints) >= num_of_frames: 
                 self.save_sample()
                 self.window.show_message("Recording saved. Start new recording when you're ready.")
                 #cleanup
@@ -65,7 +67,11 @@ class RecordGesturesApp(BaseApp):
                 self.recorded_keypoints = []
 
     def save_sample(self):
-        pass
+        frame_data = []
+        for hand in self.keypoints:
+            hand_data = [[lm.x, lm.y, lm.z] for lm in hand.landmark]
+            frame_data.append(hand_data)
+        # save in correct format in correct dir
 
 class PredictGestureLiveApp(BaseApp):
     """
