@@ -27,6 +27,8 @@ ML:
 2) Preprocessing (normalise, extract features e.g., angles, distances?)
 3) Update temporal input buffer (10-30 last frames)
 4) Classify with 1D CNN / lightweight TCN (needs to be trained)
+OR Random Forest / XGBoost (could add Frame Deltas, mean&variance motion, Max/Min displacement, Hand centroid trajectory, Angle between fingers, Motion energy)
+OR KNN with DTW
 5) Post-processing (e.g., majority vote or exponential moving average?)
 
 ---
