@@ -1,4 +1,5 @@
 import tkinter as tk
+from re import match
 
 class BaseWindow():
     def __init__(self):
@@ -15,19 +16,44 @@ class BaseWindow():
         self.lbl = tk.Label(self.root, text = "")
         self.lbl.grid(column=0, row=1)
 
+        self.lbl_handedness = tk.Label(self.root, text = "")
+        self.lbl_handedness.grid(column=0, row=4)
+
+    def show_detected_hands_message(self, handedness_pred: str):
+        self.lbl_handedness.configure(text = handedness_pred)
+
     def activate_on_close_protocol(self, close_callback):
         self.root.protocol("WM_DELETE_WINDOW", close_callback)
 
 class RecordingMode(BaseWindow):
     def __init__(self, record_callback):
         super().__init__()
+        
+        # Entry box for gesture name
+        self.lbl.configure(text = "Gesture name (eg. thumbs_up, like, palm, crossed_fingers etc):")
+        self.gesture_name = tk.StringVar()
+        self.gesture_name.trace_add("write", self.check_input)
+        self.entry = tk.Entry(self.root, textvariable=self.gesture_name)
+        self.entry.grid(column=0, row=2, padx=10, pady=5)
+
+        # Record button only clickable when gesture name given; countdown and callback once clicked
         self.record_callback = record_callback
-        self.lbl.configure(text = "Start recording when you're ready")
-        btn = tk.Button(self.root, 
+        self.btn = tk.Button(self.root, 
                         text = "Record",
-                        fg = "red", 
+                        fg = "red",
+                        state=tk.DISABLED,
                         command=self.record_clicked)
-        btn.grid(column=0, row=2)
+        self.btn.grid(column=0, row=3)
+
+    def check_input(self, *args):
+        pattern = r'^[a-z]+(_[a-z]+)*$'
+        if self.gesture_name.get().strip() and match(pattern, self.gesture_name.get().strip()):
+            self.btn.config(state=tk.NORMAL)
+        else:
+            self.btn.config(state=tk.DISABLED)
+
+    def get_input(self):
+        return self.gesture_name.get().strip()
 
     def record_clicked(self):
         self.countdown(3)
