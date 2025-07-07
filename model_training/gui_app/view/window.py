@@ -56,7 +56,7 @@ class RecordingMode(BaseWindow):
         return self.gesture_name.get().strip()
 
     def record_clicked(self):
-        self.countdown(3)
+        self.countdown(0)
     
     def countdown(self, count):
         if count > 0:
