@@ -1,1 +1,0 @@
-#  "load processed keypoints with class assigned -> train classifier -> save model"
