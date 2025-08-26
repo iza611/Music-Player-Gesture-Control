@@ -12,7 +12,7 @@ logger.info(f"PROJ_ROOT path is: {PROJ_ROOT}")
 
 DATA_DIR = PROJ_ROOT / "data"
 KEYPOINT_DATA_DIR = DATA_DIR / "keypoints"
-EMBEDDINGS_DATA_DIR = DATA_DIR / "embeddings"
+KEYPOINT_NORM_DATA_DIR = DATA_DIR / "keypoints_normalised"
 
 MODELS_DIR = PROJ_ROOT / "gesture_classification" / "models"
 
