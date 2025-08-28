@@ -4,6 +4,9 @@ import numpy as np
 from loguru import logger
 from tqdm import tqdm
 import typer
+import torch
+from typing import Tuple, Dict
+import json
 
 from gesture_classification.config import KEYPOINT_DATA_DIR, KEYPOINT_NORM_DATA_DIR
 
@@ -107,6 +110,70 @@ def normalise_keypoints_for_class(class_name: str) -> None:
     np.save(archive_dir, keypoints_normalised)
 
     logger.info(f"Saved normalised keypoints in {save_dir} and {archive_dir}")
+
+    # TODO: UPDATE the metadata.json file containing information about number of samples / recordings per class / gesture
+
+def normalise_all_new_classes():
+    """
+    Checks if the directory KEYPOINT_NORM_DATA_DIR contains all classes from KEYPOINT_DATA_DIR.
+    When new gestures are added, this will ensure they are normalised and later added to the dataset.
+    In case KEYPOINT_NORM_DATA_DIR contains more classes than KEYPOINT_DATA_DIR, an exception is raised and the directories should be investigated.
+    """
+    
+    keypoints_classes = [c.name for c in KEYPOINT_DATA_DIR.iterdir() if c.is_dir()]
+    keypoints_normalised_classes = [c.name[:-4] for c in KEYPOINT_NORM_DATA_DIR.glob("*.npy")]
+    
+    if keypoints_classes == keypoints_normalised_classes:
+        return
+    
+    elif len(keypoints_normalised_classes) > len(keypoints_classes):
+        # TODO
+        raise Exception 
+    
+    else:
+        non_normalised_classes = [c for c in keypoints_classes if c not in keypoints_normalised_classes]
+        for c in non_normalised_classes:
+            normalise_keypoints_for_class(c)
+
+def load_dataset() -> Tuple[torch.Tensor, torch.Tensor, Dict[int, str]]:
+    """
+    Load gesture dataset from KEYPOINT_NORM_DATA_DIR. 
+    Each `.npy` file in the directory represents all samples for one gesture class.
+
+    Returns:
+        gesture_data (torch.Tensor): Tensor of shape 
+            (num_samples, num_frames=20, num_hands=2, num_keypoints=21, num_coordinates=3).
+        gesture_labels (torch.Tensor): 1D tensor of shape (num_samples,) with integer labels. 
+        id_to_class_name (Dict[int, str]): Mapping from integer label class ID to class (gesture) name.
+    """
+
+    classes = [c.stem for c in KEYPOINT_NORM_DATA_DIR.glob("*.npy")]
+    class_name_to_id = {c: i for i, c in enumerate(classes)}
+
+    with open(KEYPOINT_NORM_DATA_DIR / "metadata.json") as f:
+        num_samples_per_class = json.load(f)
+    total_samples = sum(num_samples_per_class.values())
+    gesture_data = torch.empty((total_samples, 20, 2, 21, 3))
+    gesture_labels = torch.empty((total_samples,), dtype=torch.long)
+    
+    start_idx = 0
+    for class_path in KEYPOINT_NORM_DATA_DIR.glob("*.npy"):
+        samples = torch.from_numpy(np.load(class_path)).type(torch.float32)
+        num_samples = len(samples)
+        end_idx = start_idx + num_samples
+        gesture_data[start_idx: end_idx] = samples
+
+        class_id = class_name_to_id[class_path.stem]
+        gesture_labels[start_idx:end_idx] = class_id # broadcasting
+
+        start_idx = end_idx
+
+    if len(gesture_data) != len(gesture_labels):
+        raise ValueError(f"Data/labels size mismatch: gesture_data.shape={gesture_data.shape}, \n\
+                         gesture_labels.shape={gesture_labels.shape}.")
+
+    id_to_class_name = {i: c for i, c in enumerate(classes)}
+    return gesture_data, gesture_labels, id_to_class_name
 
 @app.command()
 def main(
