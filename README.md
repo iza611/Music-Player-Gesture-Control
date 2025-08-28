@@ -7,11 +7,11 @@ A modular, real-time gesture recognition system using webcam input to trigger us
 ---
 
 ### My notes
-Local Script: Captures webcam frames → posts to HTTP endpoint.
-Container A (Gesture Recognition): Receives frames → performs inference → posts predicted gesture.
-Container B (Spotify Control): Receives gesture → maps to a Spotify command → sends API call.
+- Local Script: Captures webcam frames → posts to HTTP endpoint.
+- Container A (Gesture Recognition): Receives frames → performs inference → posts predicted gesture.
+- Container B (Spotify Control): Receives gesture → maps to a Spotify command → sends API call.
 
-But first, create a dataset & train & evaluate the model. 
+- But first, create a dataset & train & evaluate the model. 
 
 🔹 Host Script 
 - Initializes the webcam and launches both containers.
