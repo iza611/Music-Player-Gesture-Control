@@ -1,5 +1,5 @@
 ### Why?
-I'm developing this for my partner, who is a tattoo artist. Music is VERY important in a tattoo shop, but controlling it while tattooing and wearing sterile gloves can be a real headache. That's why I created this project!
+I'm working on this project to improve the work environment for a tattoo artist. Music is VERY important in a tattoo shop, but controlling it while tattooing and wearing sterile gloves can be a real headache. That's why I created this project!
 
 ### How?
 A modular, real-time gesture recognition system using webcam input to trigger user-defined actions — here controlling Spotify — via local HTTP APIs. Built for easy integration and full terminal control. The gesture recognition module should be reusable for other projects. 
