@@ -2,13 +2,12 @@ from datetime import datetime
 
 import numpy as np
 from loguru import logger
-from tqdm import tqdm
 import typer
 import torch
 from typing import Tuple, Dict
-import json
+import csv
 
-from gesture_classification.config import KEYPOINT_DATA_DIR, KEYPOINT_NORM_DATA_DIR
+from config import KEYPOINT_DATA_DIR, KEYPOINT_NORM_DATA_DIR
 
 app = typer.Typer()
 
@@ -111,7 +110,10 @@ def normalise_keypoints_for_class(class_name: str) -> None:
 
     logger.info(f"Saved normalised keypoints in {save_dir} and {archive_dir}")
 
-    # TODO: UPDATE the metadata.json file containing information about number of samples / recordings per class / gesture
+    # METADATA.CSV UPDATE
+    with open(KEYPOINT_NORM_DATA_DIR / "metadata.csv", mode="a", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow([class_name, keypoints_normalised.shape[0]])
 
 def normalise_all_new_classes():
     """
@@ -121,7 +123,7 @@ def normalise_all_new_classes():
     """
     
     keypoints_classes = [c.name for c in KEYPOINT_DATA_DIR.iterdir() if c.is_dir()]
-    keypoints_normalised_classes = [c.name[:-4] for c in KEYPOINT_NORM_DATA_DIR.glob("*.npy")]
+    keypoints_normalised_classes = [c.stem[:-7] for c in KEYPOINT_NORM_DATA_DIR.glob("*latest.npy")]
     
     if keypoints_classes == keypoints_normalised_classes:
         return
@@ -135,6 +137,10 @@ def normalise_all_new_classes():
         for c in non_normalised_classes:
             normalise_keypoints_for_class(c)
 
+def normalise_new_samples(class_name):
+    # TODO
+    pass
+
 def load_dataset() -> Tuple[torch.Tensor, torch.Tensor, Dict[int, str]]:
     """
     Load gesture dataset from KEYPOINT_NORM_DATA_DIR. 
@@ -147,23 +153,30 @@ def load_dataset() -> Tuple[torch.Tensor, torch.Tensor, Dict[int, str]]:
         id_to_class_name (Dict[int, str]): Mapping from integer label class ID to class (gesture) name.
     """
 
-    classes = [c.stem for c in KEYPOINT_NORM_DATA_DIR.glob("*.npy")]
+    classes = [c.stem[:-7] for c in KEYPOINT_NORM_DATA_DIR.glob("*latest.npy")]
     class_name_to_id = {c: i for i, c in enumerate(classes)}
 
-    with open(KEYPOINT_NORM_DATA_DIR / "metadata.json") as f:
-        num_samples_per_class = json.load(f)
-    total_samples = sum(num_samples_per_class.values())
+    total_samples = 0
+    with open(KEYPOINT_NORM_DATA_DIR / "metadata.csv", mode="r", newline="") as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            if len(row) == 2:
+                total_samples += int(row[1])
+
     gesture_data = torch.empty((total_samples, 20, 2, 21, 3))
     gesture_labels = torch.empty((total_samples,), dtype=torch.long)
     
     start_idx = 0
-    for class_path in KEYPOINT_NORM_DATA_DIR.glob("*.npy"):
+    for class_path in KEYPOINT_NORM_DATA_DIR.glob("*latest.npy"):
+        class_name = class_path.stem[:-7]
+        class_id = class_name_to_id[class_name]
+        logger.info(f"Loading class {class_name} ({class_id+1}/{len(classes)})...")
+
         samples = torch.from_numpy(np.load(class_path)).type(torch.float32)
         num_samples = len(samples)
         end_idx = start_idx + num_samples
-        gesture_data[start_idx: end_idx] = samples
 
-        class_id = class_name_to_id[class_path.stem]
+        gesture_data[start_idx: end_idx] = samples
         gesture_labels[start_idx:end_idx] = class_id # broadcasting
 
         start_idx = end_idx
@@ -173,6 +186,10 @@ def load_dataset() -> Tuple[torch.Tensor, torch.Tensor, Dict[int, str]]:
                          gesture_labels.shape={gesture_labels.shape}.")
 
     id_to_class_name = {i: c for i, c in enumerate(classes)}
+    logger.info("Successfully loaded and prepared the dataset.")
+    logger.info(f"gesture_data: {gesture_data.shape}")
+    logger.info(f"gesture_labels: {gesture_labels.shape}")
+    logger.info(f"id_to_class_name: {id_to_class_name}")
     return gesture_data, gesture_labels, id_to_class_name
 
 @app.command()
