@@ -1,3 +1,6 @@
+If you wanna see what I've done so far, check out `./data/` 
+Next up: `./training/`! 
+
 ### Why?
 I'm working on this project to improve the work environment for a tattoo artist. Music is VERY important in a tattoo shop, but controlling it while tattooing and wearing sterile gloves can be a real headache. That's why I created this project!
 
