@@ -1,8 +1,11 @@
+Custom gestures captured with a laptop webcam to control Spotify music. 
+
 If you wanna see what I've done so far, check out `./data/` 
 Next up: `./training/`! 
 
 ### Why?
-I'm working on this project to improve the work environment for a tattoo artist. Music is VERY important in a tattoo shop, but controlling it while tattooing and wearing sterile gloves can be a real headache. That's why I created this project!
+I'm working on this project to make the work setup for a tattoo artist a bit easier. Music is VERY important in a tattoo shop, but controlling it while tattooing and wearing sterile gloves can be challenging. 
+(Yes, it's probably an overkill 😅, but really, this is just a fun project for practice and learning)
 
 ### How?
 A modular, real-time gesture recognition system using webcam input to trigger user-defined actions — here controlling Spotify — via local HTTP APIs. Built for easy integration and full terminal control. The gesture recognition module should be reusable for other projects. 
