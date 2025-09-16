@@ -1,0 +1,1 @@
+# local script running containers and capturing webcam input and passing to 1st container server for inference
