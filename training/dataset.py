@@ -2,16 +2,39 @@ import numpy as np
 from loguru import logger
 import typer
 import torch
+from torch.utils.data import Dataset
 from typing import Tuple, Dict
 import csv
+from pathlib import Path
+import re
 
-from config import KEYPOINT_NORM_DATA_DIR
+from config import KEYPOINT_NORM_DATA_DIR, NUM_FRAMES, NUM_HANDS, NUM_KEYPOINTS, NUM_COORDS
 
 app = typer.Typer()
 
-def load_dataset() -> Tuple[torch.Tensor, torch.Tensor, Dict[int, str]]:
+class CustomGesturesDataset(Dataset):
+    """Custom Dataset for gesture data stored in tensors."""
+    def __init__(self, x: torch.Tensor, y: torch.Tensor):
+        self.x = x
+        self.y = y
+
+    def __len__(self):
+        return len(self.x)
+    
+    def __getitem__(self, idx):
+        return self.x[idx], self.y[idx]
+
+def extract_class_name(filename: str) -> str:
+    """Extract the class name from a filename of the format '<class_name>_latest.npy'."""
+    name = re.match(r"(.+)_latest\.npy$", filename)
+    if name:
+        return name.group(1)
+    else:
+        raise ValueError(f"Invalid filename: {filename}. Expected format: '<class_name>_latest.npy'.")
+    
+def load_dataset(path: Path) -> Tuple[torch.Tensor, torch.Tensor, Dict[int, str]]:
     """
-    Load gesture dataset from KEYPOINT_NORM_DATA_DIR. 
+    Load gesture dataset from the given path. 
     Each `.npy` file in the directory represents all samples for one gesture class.
 
     Returns:
@@ -21,22 +44,22 @@ def load_dataset() -> Tuple[torch.Tensor, torch.Tensor, Dict[int, str]]:
         id_to_class_name (Dict[int, str]): Mapping from integer label class ID to class (gesture) name.
     """
 
-    classes = [c.stem[:-7] for c in KEYPOINT_NORM_DATA_DIR.glob("*latest.npy")]
+    classes = [extract_class_name(c.name) for c in path.glob("*latest.npy")]
     class_name_to_id = {c: i for i, c in enumerate(classes)}
 
     total_samples = 0
-    with open(KEYPOINT_NORM_DATA_DIR / "metadata.csv", mode="r", newline="") as csvfile:
+    with open(path / "metadata.csv", mode="r", newline="") as csvfile:
         reader = csv.reader(csvfile)
         for row in reader:
             if len(row) == 2:
                 total_samples += int(row[1])
 
-    gesture_data = torch.empty((total_samples, 20, 2, 21, 3))
+    gesture_data = torch.empty((total_samples, NUM_FRAMES, NUM_HANDS, NUM_KEYPOINTS, NUM_COORDS), dtype=torch.float32)
     gesture_labels = torch.empty((total_samples,), dtype=torch.long)
     
     start_idx = 0
-    for class_path in KEYPOINT_NORM_DATA_DIR.glob("*latest.npy"):
-        class_name = class_path.stem[:-7]
+    for class_path in path.glob("*latest.npy"):
+        class_name = extract_class_name(class_path.name)
         class_id = class_name_to_id[class_name]
         logger.info(f"Loading class {class_name} ({class_id+1}/{len(classes)})...")
 
@@ -61,20 +84,11 @@ def load_dataset() -> Tuple[torch.Tensor, torch.Tensor, Dict[int, str]]:
     return gesture_data, gesture_labels, id_to_class_name
 
 @app.command()
-def main(
-    # ---- REPLACE DEFAULT PATHS AS APPROPRIATE ----
-    # input_path: Path = RAW_DATA_DIR / "dataset.csv",
-    # output_path: Path = PROCESSED_DATA_DIR / "dataset.csv",
-    # ----------------------------------------------
-):
-    # ---- REPLACE THIS WITH YOUR OWN CODE ----
+def main():
     logger.info("Processing dataset...")
-    # for i in tqdm(range(10), total=10):
-    #     if i == 5:
-    #         logger.info("Something happened for iteration 5.")
+    x, y, class_to_gesture_name = load_dataset(path = KEYPOINT_NORM_DATA_DIR)
+    dataset = CustomGesturesDataset(x, y)
     logger.success("Processing dataset complete.")
-    # -----------------------------------------
-
 
 if __name__ == "__main__":
     app()

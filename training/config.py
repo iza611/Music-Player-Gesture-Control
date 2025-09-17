@@ -7,17 +7,24 @@ from loguru import logger
 # load_dotenv()
 
 # Paths
-PROJ_ROOT = Path(__file__).resolve().parents[2]
+PROJ_ROOT = Path(__file__).resolve().parents[1]
 logger.info(f"PROJ_ROOT path is: {PROJ_ROOT}")
 
 DATA_DIR = PROJ_ROOT / "data"
-KEYPOINT_DATA_DIR = DATA_DIR / "keypoints"
-KEYPOINT_NORM_DATA_DIR = DATA_DIR / "keypoints_normalised"
+KEYPOINT_DATA_DIR = DATA_DIR / "keypoints_data"
+KEYPOINT_NORM_DATA_DIR = KEYPOINT_DATA_DIR / "normalised"
 
-MODELS_DIR = PROJ_ROOT / "gesture_classification" / "models"
+MODELS_DIR = PROJ_ROOT / "training" / "models"
 
-REPORTS_DIR = PROJ_ROOT / "reports"
-FIGURES_DIR = REPORTS_DIR / "gesture_classification" / "figures"
+# MODELS_DIR = PROJ_ROOT / "gesture_classification" / "models"
+
+# REPORTS_DIR = PROJ_ROOT / "reports"
+# FIGURES_DIR = REPORTS_DIR / "gesture_classification" / "figures"
+
+NUM_FRAMES = 20
+NUM_HANDS = 2
+NUM_KEYPOINTS = 21
+NUM_COORDS = 3
 
 N_CLASSES = 2
 RANDOM_STATE = 7
